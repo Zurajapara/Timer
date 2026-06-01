@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zura's Real Time Clock</title>
+    <style>
+        html,body{height:100%;margin:0}
+        body{font-family: 'Segoe UI', Roboto, Arial, sans-serif;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f8ffae 0%, #ffd6a5 50%, #6a11cb 100%);}
+        .card{background:rgba(255,255,255,0.92);padding:28px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.15);text-align:center;max-width:720px;width:90%}
+        h1{color:#6a11cb;margin:0 0 8px 0;font-weight:700}
+        #clock{font-size:6em;font-weight:700;letter-spacing:6px;color:#ff7a18}
+        #date{font-size:1.2em;color:#333;margin-top:8px}
+        @media(max-width:480px){#clock{font-size:3.2em}}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>ზურას საათი</h1>
+        <div id="clock"></div>
+        <div id="date"></div>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}.${milliseconds[0]}`;
+            const dateString = now.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('date').textContent = dateString;
+        }
+        setInterval(updateClock, 100);
+        updateClock();
+    </script>
+</body>
+</html>

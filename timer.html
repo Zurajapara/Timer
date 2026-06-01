@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<audio id="beep" src="beep_short.ogg" preload="auto"></audio>
+<script>
+    function playBeep() {
+        const beep = document.getElementById('beep');
+        beep.currentTime = 0;
+        beep.play();
+    }
+</script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ტაიმერი</title>
+    <style>
+        :root { --bg1: #3f51b5; --bg2: #00bcd4; --accent: #ffca28; --glass: rgba(255,255,255,0.18); }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.25), transparent 28%),
+                        linear-gradient(135deg, #3f51b5 0%, #00bcd4 55%, #673ab7 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .container {
+            width: 100%;
+            max-width: 860px;
+            padding: 28px 30px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 22px 60px rgba(0,0,0,0.25);
+            backdrop-filter: blur(18px);
+        }
+        h2 {
+            margin: 0 0 24px;
+            font-size: 2.2rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.25);
+        }
+        .container > div:first-of-type {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        label {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-size: 1rem;
+            min-width: 190px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        input[type=number] {
+            margin-left: 10px;
+            width: 85px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+        }
+        .timer {
+            font-size: 5.2rem;
+            margin: 16px 0 22px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            background: linear-gradient(90deg, #ffca28, #ff5722, #7c4dff);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(110px, 1fr));
+            gap: 12px;
+            justify-items: center;
+        }
+        .controls button {
+            width: 100%;
+            padding: 13px 14px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff8a65 0%, #ffca28 100%);
+            color: #2b2b2b;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 14px 26px rgba(0,0,0,0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(0,0,0,0.24);
+        }
+        .laps {
+            margin-top: 22px;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+        .laps li {
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 660px) {
+            .controls { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+            .timer { font-size: 3.4rem; }
+            label { min-width: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h2>დარჩენილი დროის ტაიმერი</h2>
+    <div>
+        <label>Minutes: <input type="number" id="minutes" min="0" max="999" value="0"></label>
+        <label>Seconds: <input type="number" id="seconds" min="0" max="59" value="0"></label>
+    </div>
+    <div class="timer" id="display">00:00</div>
+    <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="stopBtn">Stop</button>
+        <button id="resetBtn">Reset</button>
+        <button id="lapBtn">Lap</button>
+        <button id="ClrLapBtn">Clr Laps</button>
+    </div>
+    <ul class="laps" id="laps"></ul>
+
+    <script>
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let interval = null;
+
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+        const display = document.getElementById('display');
+        const lapsList = document.getElementById('laps');
+
+        function updateDisplay(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            display.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (interval) return;
+            if (remainingSeconds <= 0) {
+                totalSeconds = parseInt(minutesInput.value, 10) * 60 + parseInt(secondsInput.value, 10);
+                remainingSeconds = totalSeconds;
+            }
+            updateDisplay(remainingSeconds);
+            interval = setInterval(() => {
+                if (remainingSeconds > 0) {
+                    remainingSeconds--;
+                    updateDisplay(remainingSeconds);
+                } else {
+                    stopTimer();
+                }
+            }, 1000);
+            playBeep()
+        }
+
+        function stopTimer() {
+            clearInterval(interval);
+            interval = null;
+            playBeep()
+        }
+
+        function resetTimer() {
+            stopTimer();
+            totalSeconds = parseInt(minutesInput.value, 10) * 60 + parseInt(secondsInput.value, 10);
+            remainingSeconds = totalSeconds;
+            updateDisplay(remainingSeconds);
+            lapsList.innerHTML = '';
+        }
+
+        function lapTimer() {
+            if (remainingSeconds > 0 && interval) {
+                const m = Math.floor(remainingSeconds / 60);
+                const s = remainingSeconds % 60;
+                const li = document.createElement('li');
+                li.textContent = `Lap: ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                lapsList.appendChild(li);
+                playBeep()
+            }
+        }
+        function clearLaps() {
+            lapsList.innerHTML = '';
+        }
+
+
+        document.getElementById('startBtn').onclick = startTimer;
+        document.getElementById('stopBtn').onclick = stopTimer;
+        document.getElementById('resetBtn').onclick = resetTimer;
+        document.getElementById('lapBtn').onclick = lapTimer;
+        document.getElementById('ClrLapBtn').onclick = clearLaps;
+
+        // Make buttons equal size
+        const buttons = document.querySelectorAll('.controls button');
+        let maxWidth = 0;
+        buttons.forEach(btn => {
+            btn.style.width = 'auto';
+            if (btn.offsetWidth > maxWidth) maxWidth = btn.offsetWidth;
+        });
+        buttons.forEach(btn => {
+            btn.style.width = maxWidth + 'px';
+        });
+
+        // Initialize display
+        updateDisplay(0);
+    </script>
+    </div>
+</body>
+</html>
