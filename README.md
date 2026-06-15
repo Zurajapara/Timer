@@ -1,1 +1,1 @@
-my test projects
+my test project
